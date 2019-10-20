@@ -34,7 +34,6 @@ class BaseAttn(keras.models.Model):
         return context_vector, attention_weights
 
 
-
 class BahdanauAttn(BaseAttn):
     
     def __init__(self, n_units, **kwargs):
