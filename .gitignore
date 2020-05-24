@@ -109,4 +109,8 @@ venv.bak/
 .mypy_cache/
 
 
+**/data/**/data/
+**/data
+.DS_Store
 **/data/
+**/*.ipynb
