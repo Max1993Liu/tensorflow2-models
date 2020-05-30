@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
+from typing import Dict
 
 
 
@@ -52,6 +53,52 @@ class CrossNet(layers.Layer):
 # passing multiple input as dictionary is supported by specifying the name for each Input
 # as demonstrated in @omalleyt12's comment under this thread: https://github.com/tensorflow/tensorflow/issues/34114
 
+
+def build_deep_and_cross(discrete_feature_size: Dict[str, int], 
+                        continuous_feature_size: int, 
+                        n_deep_layers: int=3,
+                        deep_layer_size: int=100,
+                        n_cross_layers: int=3):
+    """ 
+    :param discrete_feature_size: Dictionary mapping feature name to its number of unique values
+    :param continuous_feature_size: Number of continuous features
+    """
+
+    discrete_input = [layers.Input(shape=(), dtype=tf.int8, name=name) for name in discrete_feature_size]
+    continuous_input = layers.Input(shape=(continuous_feature_size, ), 
+                                    dtype=tf.float32, name='continuous_features')
+
+    embeddings = []
+    for name, input_dim in discrete_feature_size.items():
+        output_dim = min(int(6 * np.power(input_dim, 1/4)), input_dim)
+        embeddings.append(layers.Embedding(input_dim, output_dim, name='{}_embedding'.format(name)))
+
+
+    # get the embeddings for discrete inputs and concatenate them together
+    embedding_output = [e(i) for i, e in zip(discrete_input, embeddings)]
+    embedding_output.append(continuous_input)
+
+    embedding_output = layers.Concatenate(axis=-1)(embedding_output)
+    embedding_output
+
+
+    # build the deep and cross part
+    deep_layer = keras.models.Sequential(layers=[
+        layers.Dense(deep_layer_size, activation='relu') for _ in range(n_deep_layers)
+    ])
+
+
+    cross_layer = CrossNet(n_layers=n_cross_layers)
+
+    # concatenate the deep and cross part and add a final layer of output
+    output = layers.Concatenate(axis=-1)([cross_layer(embedding_output), deep_layer(embedding_output)])
+    output = layers.Dense(1, activation='sigmoid')(output)
+
+    model = keras.models.Model(inputs=discrete_input+[continuous_input], outputs=output)
+
+    return model
+
+
 # a dictionary mapping feature name to its number of unique values
 discrete_feature_size = {
     'a': 5,
@@ -61,13 +108,6 @@ discrete_feature_size = {
 continuous_feature_size = 10
 
 
-discrete_input = [layers.Input(shape=(), dtype=tf.int8, name=name) for name in discrete_feature_size]
-continuous_input = layers.Input(shape=(continuous_feature_size, ), 
-                                dtype=tf.float32, name='continuous_features')
 
-embeddings = []
-for name, input_dim in discrete_feature_size.items():
-    output_dim = min(int(6 * np.power(input_dim, 1/4)), input_dim)
-    embeddings.append(layers.Embedding(input_dim, output_dim, name='{}_embedding'.format(name)))
-
-
+DCN = build_deep_and_cross(discrete_feature_size, continuous_feature_size)
+print(DCN)
