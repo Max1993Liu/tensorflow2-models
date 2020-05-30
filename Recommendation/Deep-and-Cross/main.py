@@ -53,9 +53,16 @@ def prepare():
 
 discrete_feature_size, continuous_feature_size, X_train, y_train, X_test, y_test = prepare()
 
-DCN = build_deep_and_cross(discrete_feature_size, continuous_feature_size)
-DCN.compile(optimizer=tf.optimizers.Adam(1e-2), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-DCN.fit(x=X_train, y=y_train, validation_data=(X_test, y_test),
-		batch_size=32, epochs=1, shuffle=True)
 
+# The optimal hyperparameter settings in the original paper 
+# were 8 cross layers of size 54 and 6 deep layers of size 292 for DCN
+DCN = build_deep_and_cross(discrete_feature_size, continuous_feature_size, 
+							label_size=y_train.shape[1],
+							n_deep_layers=6,
+							deep_layer_size=100,
+							n_cross_layers=8,
+							share_weights=False)
+DCN.compile(optimizer=tf.optimizers.Adam(1e-2), loss='categorical_crossentropy', metrics=['accuracy'])
+DCN.fit(x=X_train, y=y_train, validation_data=(X_test, y_test),
+		batch_size=256, epochs=20, shuffle=True)
 

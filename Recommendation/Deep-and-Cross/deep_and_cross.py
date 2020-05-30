@@ -29,14 +29,17 @@ class CrossNet(layers.Layer):
     
     def cross_layer(self, x0, x, layer):
         # both x0 and x has shape (None, feature_dim)
+        feature_dim = tf.shape(x)[1]
+
         dot_product = tf.matmul(tf.expand_dims(x0, 2), tf.expand_dims(x, 1)) # (None, feature_dim, feature_dim)
-        
-        out = tf.squeeze(layer(dot_product)) # (None, feature_dim)
-        
+
+        # out = tf.squeeze(layer(dot_product)) # (None, feature_dim)
+        out = tf.reshape(layer(dot_product), (-1, feature_dim))
+
         # residual connection
         out = out + x
-        return x
-    
+        return out
+
     def call(self, x):
         x0 = tf.identity(x)   # (None, feature_dim)
         
@@ -56,12 +59,15 @@ class CrossNet(layers.Layer):
 
 def build_deep_and_cross(discrete_feature_size: Dict[str, int], 
                         continuous_feature_size: int, 
+                        label_size: int,
                         n_deep_layers: int=3,
                         deep_layer_size: int=100,
-                        n_cross_layers: int=3):
+                        n_cross_layers: int=3,
+                        share_weights: bool=False):
     """ 
     :param discrete_feature_size: Dictionary mapping feature name to its number of unique values
     :param continuous_feature_size: Number of continuous features
+    :param label_size: Size of output label.
     """
 
     discrete_input = [layers.Input(shape=(), dtype=tf.int8, name=name) for name in discrete_feature_size]
@@ -85,11 +91,11 @@ def build_deep_and_cross(discrete_feature_size: Dict[str, int],
         layers.Dense(deep_layer_size, activation='relu') for _ in range(n_deep_layers)
     ])
 
-    cross_layer = CrossNet(n_layers=n_cross_layers)
+    cross_layer = CrossNet(n_layers=n_cross_layers, share_weights=share_weights)
 
     # concatenate the deep and cross part and add a final layer of output
     output = layers.Concatenate(axis=-1, name='concat_output')([cross_layer(embedding_output), deep_layer(embedding_output)])
-    output = layers.Dense(1, activation='sigmoid')(output)
+    output = layers.Dense(label_size, activation='sigmoid')(output)
 
     model = keras.models.Model(inputs=discrete_input+[continuous_input], outputs=output)
 
