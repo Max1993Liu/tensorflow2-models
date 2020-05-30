@@ -11,16 +11,19 @@ Overall model architecture:
 
 # Cross Layer
 
+Overall model structure:
+![model](/image/model.png)
+
 The formula of the cross layer from the original paper:
-![](image/cross_formula.png)
+![formula](/image/cross_formula.png)
 
 Visulization of the **Cross Layer**:
-![](image/cross_viz.png)
+![layer](/image/cross_viz.png)
 
 
 # Example
 
-Use the ![Forest Cover Type](https://www.kaggle.com/uciml/forest-cover-type-dataset/data) data as mentioned in the original paper. `python main.py` to run the example.
+Use the [Forest Cover Type](https://www.kaggle.com/uciml/forest-cover-type-dataset/data) data as mentioned in the original paper. `python main.py` to run the example.
 
 # Liscence
 MIT
