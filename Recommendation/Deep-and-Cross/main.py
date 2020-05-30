@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.preprocessing import StandardScaler
 
 
 from deep_and_cross import build_deep_and_cross
@@ -19,6 +20,8 @@ def prepare():
 
 	target_col = 'Cover_Type'
 	continuous_cols = [c for c in df if c != target_col and 'Soil' not in c and 'Wilderness' not in c]
+	df[continuous_cols] = StandardScaler().fit_transform(df[continuous_cols])	
+
 	df['soil_type'] = reverse_onehot(df[[c for c in df if 'Soil' in c]])
 	df['wilderness_area'] = reverse_onehot(df[[c for c in df if 'Wilderness' in c]])
 
