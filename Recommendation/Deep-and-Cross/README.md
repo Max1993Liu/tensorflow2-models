@@ -11,14 +11,11 @@ Overall model architecture:
 
 # Cross Layer
 
-Overall model structure:
-![model](/image/model.png)
-
 The formula of the cross layer from the original paper:
-![formula](/image/cross_formula.png)
+![](image/cross_formula.png)
 
 Visulization of the **Cross Layer**:
-![layer](/image/cross_viz.png)
+![](image/cross_viz.png)
 
 
 # Example
