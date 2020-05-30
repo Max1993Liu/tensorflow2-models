@@ -18,5 +18,9 @@ Visulization of the **Cross Layer**:
 ![](image/cross_viz.png)
 
 
+# Example
+
+Use the ![Forest Cover Type](https://www.kaggle.com/uciml/forest-cover-type-dataset/data) data as mentioned in the original paper. `python main.py` to run the example.
+
 # Liscence
 MIT

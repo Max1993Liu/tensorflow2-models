@@ -78,36 +78,20 @@ def build_deep_and_cross(discrete_feature_size: Dict[str, int],
     embedding_output = [e(i) for i, e in zip(discrete_input, embeddings)]
     embedding_output.append(continuous_input)
 
-    embedding_output = layers.Concatenate(axis=-1)(embedding_output)
-    embedding_output
-
+    embedding_output = layers.Concatenate(axis=-1, name='concat_emb')(embedding_output)
 
     # build the deep and cross part
     deep_layer = keras.models.Sequential(layers=[
         layers.Dense(deep_layer_size, activation='relu') for _ in range(n_deep_layers)
     ])
 
-
     cross_layer = CrossNet(n_layers=n_cross_layers)
 
     # concatenate the deep and cross part and add a final layer of output
-    output = layers.Concatenate(axis=-1)([cross_layer(embedding_output), deep_layer(embedding_output)])
+    output = layers.Concatenate(axis=-1, name='concat_output')([cross_layer(embedding_output), deep_layer(embedding_output)])
     output = layers.Dense(1, activation='sigmoid')(output)
 
     model = keras.models.Model(inputs=discrete_input+[continuous_input], outputs=output)
 
     return model
 
-
-# a dictionary mapping feature name to its number of unique values
-discrete_feature_size = {
-    'a': 5,
-    'b': 4
-}
-
-continuous_feature_size = 10
-
-
-
-DCN = build_deep_and_cross(discrete_feature_size, continuous_feature_size)
-print(DCN)
