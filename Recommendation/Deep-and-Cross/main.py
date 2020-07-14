@@ -65,7 +65,7 @@ DCN = build_deep_and_cross(discrete_feature_size, continuous_feature_size,
 							deep_layer_size=100,
 							n_cross_layers=8,
 							share_weights=False)
-DCN.compile(optimizer=tf.optimizers.Adam(1e-2), loss='categorical_crossentropy', metrics=['accuracy'])
+DCN.compile(optimizer=tf.optimizers.Adam(1e-3), loss='categorical_crossentropy', metrics=['accuracy'])
 DCN.fit(x=X_train, y=y_train, validation_data=(X_test, y_test),
 		batch_size=256, epochs=20, shuffle=True)
 
